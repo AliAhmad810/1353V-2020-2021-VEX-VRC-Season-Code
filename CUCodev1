@@ -353,12 +353,7 @@ void autoDriveTime(int leftPower, int rightPower, int time)
   bRight.spin(vex::directionType::fwd, -1*rightPower, vex::velocityUnits::pct);
 }
 
-void testAuto()
-{
-  
-}
-
-void auton(void)
+void midA()
 {
   vex::task driving(drivePID);
   vex::task intaking(intake);
@@ -370,11 +365,35 @@ void auton(void)
   resetDriveSensors = true;
   desiredValue = 500;
   desiredTurnValue = -230;
-  vex::task::sleep(300);
+  vex::task::sleep(500);
+  resetDriveSensors = true;
+  desiredValue = 0;
+  desiredTurnValue = 0;
+  autoIndexTime(100,1500);
+  
+  resetDriveSensors = true;
+  desiredValue = -2100;
+  desiredTurnValue = 400;
+
+  vex::task::sleep(2000);
+/*
+  resetDriveSensors = true;
+  desiredValue = 360;
+  desiredTurnValue = -200;
+*/
   //enableIntake = false;
   //enableIndex = true;
   //vex::task::sleep(1000);
   //enableIndex = false;
+}
+
+void auton(void)
+{
+  vex::task driving(drivePID);
+  vex::task intaking(intake);
+  vex::task indexing(index);
+
+  
 
 }
 
