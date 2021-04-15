@@ -1,0 +1,420 @@
+#include "vex.h"
+
+using namespace vex;
+
+competition Competition;
+
+vex::controller Controller = vex::controller();
+//Drive train motors
+vex::motor fLeft  = vex::motor(vex::PORT8, vex::gearSetting::ratio18_1, false); //Front left motor
+vex::motor bLeft  = vex::motor(vex::PORT18,  vex::gearSetting::ratio18_1, false); //Back left motor
+vex::motor fRight = vex::motor(vex::PORT1,  vex::gearSetting::ratio18_1, true); //Front right motor
+vex::motor bRight = vex::motor(vex::PORT11,  vex::gearSetting::ratio18_1, true); //Back right motor
+//Indexer motors
+vex::motor rRoller = vex::motor(vex::PORT19,  vex::gearSetting::ratio18_1, false);
+vex::motor lRoller = vex::motor(vex::PORT12, vex::gearSetting::ratio18_1, false);
+//Intake motors
+vex::motor rIntake = vex::motor(vex::PORT3, vex::gearSetting::ratio18_1, true);
+vex::motor lIntake = vex::motor(vex::PORT9, vex::gearSetting::ratio18_1, false);
+
+///////////////////////////////////////////////////////////////
+//                        Driver Code                        //
+///////////////////////////////////////////////////////////////
+
+void brakeIndexer()
+{
+  lRoller.stop(vex::brakeType::brake);
+  rRoller.stop(vex::brakeType::brake);
+}
+
+void brakeDrive()
+{
+  fLeft.stop(vex::brakeType::brake);
+  bLeft.stop(vex::brakeType::brake);
+  fRight.stop(vex::brakeType::brake);
+  bRight.stop(vex::brakeType::brake);
+}
+
+void holdDrive()
+{
+  fLeft.stop(vex::brakeType::hold);
+  bLeft.stop(vex::brakeType::hold);
+  fRight.stop(vex::brakeType::hold);
+  bRight.stop(vex::brakeType::hold);
+}
+
+void brakeIntake()
+{
+  rIntake.stop(vex::brakeType::brake);
+  lIntake.stop(vex::brakeType::brake);
+}
+
+void indexerControl()
+{
+  int power = 100;
+  if(Controller.ButtonR1.pressing())
+  {
+    lRoller.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+    rRoller.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+  }
+  else if(Controller.ButtonR2.pressing())
+  {
+    lRoller.spin(vex::directionType::fwd, -1*power, vex::velocityUnits::pct);
+    rRoller.spin(vex::directionType::fwd,-1*power, vex::velocityUnits::pct);
+  }
+  else
+  {
+    brakeIndexer();
+  }
+}
+
+int drive = 0;
+
+void swapDriveSchemes()
+{
+  if(Controller.ButtonA.pressing() && drive == 1)
+  {
+    drive = 0;
+  }
+  else if(Controller.ButtonB.pressing() && drive == 0)
+  {
+    drive = 1;
+  }
+}
+
+void arcadeDriveControl()
+{
+  if(drive == 0)
+  {
+    if((abs(Controller.Axis4.value()) > 10) || (abs(Controller.Axis3.value()) > 10))
+    {
+      int leftSideValue = Controller.Axis3.value() - Controller.Axis4.value();
+      leftSideValue = .001*pow(leftSideValue,3);
+      int rightSideValue = Controller.Axis3.value() + Controller.Axis4.value();
+      rightSideValue = .001*pow(rightSideValue,3);
+
+      fLeft.spin(vex::directionType::fwd, leftSideValue, vex::velocityUnits::pct);
+      bLeft.spin(vex::directionType::fwd, leftSideValue, vex::velocityUnits::pct);
+      fRight.spin(vex::directionType::fwd, rightSideValue, vex::velocityUnits::pct);
+      bRight.spin(vex::directionType::fwd, rightSideValue, vex::velocityUnits::pct);
+    }
+    else
+    {
+      brakeDrive();
+    }
+  }
+}
+
+void tankDriveControl()
+{
+  if(drive == 1)
+  {
+    if(abs(Controller.Axis3.value()) > 10 || abs(Controller.Axis2.value()) > 10)
+    {
+      int leftSideValue = Controller.Axis3.value();
+      leftSideValue = .001*pow(leftSideValue,3);
+      int rightSideValue = Controller.Axis2.value();
+      rightSideValue = .001*pow(rightSideValue,3);
+
+      fLeft.spin(vex::directionType::fwd, leftSideValue, vex::velocityUnits::pct);
+      bLeft.spin(vex::directionType::fwd, leftSideValue, vex::velocityUnits::pct);
+      fRight.spin(vex::directionType::fwd, rightSideValue, vex::velocityUnits::pct);
+      bRight.spin(vex::directionType::fwd, rightSideValue, vex::velocityUnits::pct);
+    }
+    else 
+    {
+      brakeDrive();
+    }
+
+  }
+}
+
+void intakeControl()
+{
+  int power = -100;
+  if(Controller.ButtonL1.pressing())
+  {
+    rIntake.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+    lIntake.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+  }
+  else if(Controller.ButtonL2.pressing())
+  {
+    rIntake.spin(vex::directionType::fwd, -1*power, vex::velocityUnits::pct);
+    lIntake.spin(vex::directionType::fwd,-1*power, vex::velocityUnits::pct);
+  }
+  else
+  {
+    brakeIntake();
+  }
+}
+
+void intakeTestControl()
+{
+  if(abs(Controller.Axis2.value()) > 10)
+  {
+    int power = Controller.Axis2.value();
+    power = .001*pow(power,3);
+
+    rRoller.spin(vex::directionType::fwd, -1*power, vex::velocityUnits::pct);
+    lRoller.spin(vex::directionType::fwd, -1*power, vex::velocityUnits::pct);
+    rIntake.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+    lIntake.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+  }
+  else
+  {
+    brakeIndexer();
+    brakeIntake();
+  }
+}
+
+///////////////////////////////////////////////////////////////
+//                      Autonomous Code                      //
+///////////////////////////////////////////////////////////////
+
+// Settings
+double kP = 0.06;
+double kI = 0.0;
+double kD = 0.52;
+
+double turnkP = 0.11;
+double turnkI = 0.0;
+double turnkD = 0.0;
+
+int error; // SensorValue - DesiredValue : Position
+int prevError = 0; // Position 20 milliseconds ago
+int derivative; // error - prevError : Speed
+int totalError = 0; // totalEror = totalError + error
+
+int turnError;
+int turnPrevError = 0;
+int turnDerivative;
+int turnTotalError = 0;
+
+// Autonomous Settings
+int desiredValue = 0;
+int desiredTurnValue = 0;
+
+bool resetDriveSensors = false; 
+
+// Variables modified for use
+bool enableDrivePID = true;
+
+int drivePID()
+{
+  while(enableDrivePID)
+  {
+    if(resetDriveSensors)
+    {
+      resetDriveSensors = false;
+
+      fLeft.setPosition(0,degrees);
+      bLeft.setPosition(0,degrees);
+      fRight.setPosition(0,degrees);
+      bRight.setPosition(0,degrees);
+  
+    }
+
+    // Get the position of all motors
+    int fLeftMotorPosition = fLeft.position(degrees);
+    int bLeftMotorPosition = bLeft.position(degrees);
+    int fRightMotorPosition = fRight.position(degrees);
+    int bRightMotorPosition = bRight.position(degrees);
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // Lateral movement PID
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    // Get average of all motors
+    int averagePosition = (fLeftMotorPosition + bLeftMotorPosition + fRightMotorPosition + bRightMotorPosition) / 4;
+
+    // Potential
+    error = averagePosition - desiredValue;
+
+    // Derivative
+    derivative = error - prevError;
+
+    // Integral
+    totalError += error;
+
+    double lateralMotorPower = error * kP + derivative * kD + totalError * kI;
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // Turning movement PID
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    int turnDifference = ( bLeftMotorPosition) - ( bRightMotorPosition);
+
+    // Potential 
+    turnError = turnDifference - desiredTurnValue;
+
+    // Derivative
+    turnDerivative = turnError - turnPrevError;
+
+    // Integral
+    turnTotalError += turnError;
+
+    double turnMotorPower = turnError * turnkP + turnDerivative * turnkD + turnTotalError * turnkI;
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // Power calculation
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    int leftPower = lateralMotorPower  + turnMotorPower; 
+    int rightPower = lateralMotorPower - turnMotorPower;
+
+    fLeft.spin(vex::directionType::fwd, -1*leftPower, vex::velocityUnits::pct);
+    bLeft.spin(vex::directionType::fwd, -1*leftPower, vex::velocityUnits::pct);
+    fRight.spin(vex::directionType::fwd, -1*rightPower, vex::velocityUnits::pct);
+    bRight.spin(vex::directionType::fwd, -1*rightPower, vex::velocityUnits::pct);
+
+    prevError = error; 
+    vex::task::sleep(20); 
+  }
+
+  return 1;
+}
+
+bool enableIntake = false;
+bool enableIndex = false;
+int indexP = 0;
+
+int intake()
+{
+  while(enableIntake)
+  {
+    lIntake.spin(vex::directionType::fwd, -100, vex::velocityUnits::pct);
+    rIntake.spin(vex::directionType::fwd, -100, vex::velocityUnits::pct);
+    vex::task::sleep(5);
+  }
+  if(indexP == 1)
+  {
+    Brain.Screen.print("hend,wabdbjawbdaw");
+  }
+  if(indexP == 2)
+  {
+    Brain.Screen.print("sjgdrgfkguikgkgdguuiloohulhlshlhuhuheshsualbar");
+  }
+  lIntake.stop();
+  rIntake.stop();
+  return 1;
+}
+
+int index()
+{
+  while(enableIndex)
+  {
+    lRoller.spin(vex::directionType::fwd, indexP, vex::velocityUnits::pct);
+    rRoller.spin(vex::directionType::fwd, indexP, vex::velocityUnits::pct);
+  }
+  lRoller.stop();
+  rRoller.stop();
+  return 1;
+}
+
+void autoIndexTime(int power, int time)
+{
+  lRoller.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+  rRoller.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+  vex::task::sleep(time);
+  lRoller.stop(brakeType::brake);
+  rRoller.stop(brakeType::brake);
+  vex::task::sleep(20);
+}
+
+void autoIntakeTime(int power, int time)
+{
+  lIntake.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+  rIntake.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+  vex::task::sleep(time);
+  lIntake.stop(brakeType::brake);
+  rIntake.stop(brakeType::brake);
+  vex::task::sleep(20);
+}
+
+void autoScoringTime(int power, int time)
+{
+  lIntake.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+  rIntake.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+  lRoller.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+  rRoller.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
+  vex::task::sleep(time);
+  lIntake.stop(brakeType::brake);
+  rIntake.stop(brakeType::brake);
+  lRoller.stop(brakeType::brake);
+  rRoller.stop(brakeType::brake);
+  vex::task::sleep(20);
+}
+
+void autoDriveTime(int leftPower, int rightPower, int time)
+{
+  fLeft.spin(vex::directionType::fwd, leftPower, vex::velocityUnits::pct);
+  bLeft.spin(vex::directionType::fwd, leftPower, vex::velocityUnits::pct);
+  fRight.spin(vex::directionType::fwd, -1*rightPower, vex::velocityUnits::pct);
+  bRight.spin(vex::directionType::fwd, -1*rightPower, vex::velocityUnits::pct);
+}
+
+void testAuto()
+{
+  
+}
+
+void auton(void)
+{
+  vex::task driving(drivePID);
+  vex::task intaking(intake);
+  vex::task indexing(index);
+
+  //enableIntake = true;
+  vex::task::sleep(100);
+
+  resetDriveSensors = true;
+  desiredValue = 500;
+  desiredTurnValue = -230;
+  vex::task::sleep(300);
+  //enableIntake = false;
+  //enableIndex = true;
+  //vex::task::sleep(1000);
+  //enableIndex = false;
+
+}
+
+void pre_auton()
+{
+  brakeDrive();
+  brakeIntake();
+  brakeIndexer();
+}
+
+void usercontrol(void)
+{
+  enableDrivePID = false; 
+  enableIntake = false;
+  enableIndex = false;
+  while(1)
+  {
+    arcadeDriveControl();
+    tankDriveControl();
+    swapDriveSchemes();
+    intakeControl();
+    indexerControl();
+    //intakeTestControl();
+  }
+}
+
+int main() 
+{
+  Competition.autonomous(auton);
+  Competition.drivercontrol(usercontrol);
+
+  pre_auton();
+  while (true)
+  {
+    vex::task::sleep(1);
+  }
+  
+}
+
+///////////
+// NOTES
+///////////
+//2475 -> full 360 turn
