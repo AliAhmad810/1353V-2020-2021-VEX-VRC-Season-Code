@@ -443,7 +443,7 @@ void auton(void)
 
   vex::task::stop(indexing);
   vex::task::stop(intaking);
-  vex::task::stop(driving);
+  //vex::task::stop(driving);
 }
 
 void pre_auton()
