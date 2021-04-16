@@ -274,9 +274,12 @@ int drivePID()
   return 1;
 }
 
-bool enableIntake = false;
-bool enableIndex = false;
+bool enableIntake = true;
+bool enableIndex = true;
 int indexP = 0;
+int intakeP = 0;
+bool killIntake = false;
+bool killIndex = false;
 
 int intake()
 {
@@ -284,36 +287,30 @@ int intake()
   {
   while(enableIntake)
   {
-    lIntake.spin(vex::directionType::fwd, -100, vex::velocityUnits::pct);
-    rIntake.spin(vex::directionType::fwd, -100, vex::velocityUnits::pct);
+    lIntake.spin(vex::directionType::fwd, intakeP, vex::velocityUnits::pct);
+    rIntake.spin(vex::directionType::fwd, intakeP, vex::velocityUnits::pct);
     vex::task::sleep(5);
-  }
-  if(indexP == 1)
-  {
-    Brain.Screen.print("hend,wabdbjawbdaw");
-  }
-  if(indexP == 2)
-  {
-    Brain.Screen.print("sjgdrgfkguikgkgdguuiloohulhlshlhuhuheshsualbar");
   }
   lIntake.stop();
   rIntake.stop();
-  vex::task::sleep(20);
+  vex::task::sleep(5);
   }
   return 1;
 }
 
 int index()
 {
-  while(true){
-  while(enableIndex)
+  while(true)
   {
-    lRoller.spin(vex::directionType::fwd, indexP, vex::velocityUnits::pct);
-    rRoller.spin(vex::directionType::fwd, indexP, vex::velocityUnits::pct);
-  }
-  lRoller.stop();
-  rRoller.stop();
-  vex::task::sleep(20);
+    while(enableIndex)
+    {
+      lRoller.spin(vex::directionType::fwd, indexP, vex::velocityUnits::pct);
+      rRoller.spin(vex::directionType::fwd, indexP, vex::velocityUnits::pct);
+      vex::task::sleep(5);
+    }
+    lRoller.stop();
+    rRoller.stop();
+    vex::task::sleep(5);
   }
   return 1;
 }
@@ -435,6 +432,18 @@ void auton(void)
   resetDriveSensors = true;
   desiredValue = 500;
   desiredTurnValue = -400;
+
+  vex::task::sleep(1000);
+
+  resetDriveSensors = true;
+  desiredValue = 0;
+  desiredTurnValue = 0;
+
+  vex::task::sleep(20);
+
+  vex::task::stop(indexing);
+  vex::task::stop(intaking);
+  vex::task::stop(driving);
 }
 
 void pre_auton()
