@@ -418,7 +418,7 @@ void auton(void)
 
   indexP = 100;
   enableIndex = true;
-  vex::task::sleep(500);
+  vex::task::sleep(400);
   indexP = 0;
   enableIndex = false;
   enableIntake = false;
@@ -426,7 +426,7 @@ void auton(void)
   indexP = 100;
   enableIntake = true;
   enableIndex = true;
-  vex::task::sleep(800);
+  vex::task::sleep(700);
   indexP = 0;
   enableIntake = false;
 
@@ -445,8 +445,8 @@ void auton(void)
   enableIntake = true;
 
   resetDriveSensors = true;
-  desiredValue = 2350;
-  desiredTurnValue = -200;
+  desiredValue = 2400;
+  desiredTurnValue = -190;
 
   vex::task::sleep(2000);
 
@@ -460,6 +460,18 @@ void auton(void)
   indexP = 0;
   enableIndex = false;
   enableIntake = false;
+
+  vex::task::sleep(20);
+
+  resetDriveSensors = true;
+  desiredValue = -1200;
+  desiredTurnValue = 290;
+
+  vex::task::sleep(2000);
+
+  resetDriveSensors = true;
+  desiredValue = 0;
+  desiredTurnValue = 0;
 
   vex::task::stop(indexing);
   vex::task::stop(intaking); 
