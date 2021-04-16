@@ -111,9 +111,9 @@ void tankDriveControl()
   {
     if(abs(Controller.Axis3.value()) > 10 || abs(Controller.Axis2.value()) > 10)
     {
-      int leftSideValue = Controller.Axis3.value();
+      int leftSideValue = Controller.Axis2.value();
       leftSideValue = .001*pow(leftSideValue,3);
-      int rightSideValue = Controller.Axis2.value();
+      int rightSideValue = Controller.Axis3.value();
       rightSideValue = .001*pow(rightSideValue,3);
 
       fLeft.spin(vex::directionType::fwd, leftSideValue, vex::velocityUnits::pct);
@@ -280,6 +280,8 @@ int indexP = 0;
 
 int intake()
 {
+  while(true)
+  {
   while(enableIntake)
   {
     lIntake.spin(vex::directionType::fwd, -100, vex::velocityUnits::pct);
@@ -296,11 +298,14 @@ int intake()
   }
   lIntake.stop();
   rIntake.stop();
+  vex::task::sleep(20);
+  }
   return 1;
 }
 
 int index()
 {
+  while(true){
   while(enableIndex)
   {
     lRoller.spin(vex::directionType::fwd, indexP, vex::velocityUnits::pct);
@@ -308,6 +313,8 @@ int index()
   }
   lRoller.stop();
   rRoller.stop();
+  vex::task::sleep(20);
+  }
   return 1;
 }
 
@@ -353,38 +360,45 @@ void autoDriveTime(int leftPower, int rightPower, int time)
   bRight.spin(vex::directionType::fwd, -1*rightPower, vex::velocityUnits::pct);
 }
 
-void midA()
+void DA()
 {
   vex::task driving(drivePID);
   vex::task intaking(intake);
   vex::task indexing(index);
 
-  //enableIntake = true;
-  vex::task::sleep(100);
-
   resetDriveSensors = true;
   desiredValue = 500;
   desiredTurnValue = -230;
+
   vex::task::sleep(500);
+
   resetDriveSensors = true;
   desiredValue = 0;
   desiredTurnValue = 0;
-  autoIndexTime(100,1500);
+
+  autoIndexTime(90,1500);
   
   resetDriveSensors = true;
-  desiredValue = -2100;
+  desiredValue = -2300;
   desiredTurnValue = 400;
 
   vex::task::sleep(2000);
-/*
+
   resetDriveSensors = true;
-  desiredValue = 360;
-  desiredTurnValue = -200;
-*/
-  //enableIntake = false;
-  //enableIndex = true;
-  //vex::task::sleep(1000);
-  //enableIndex = false;
+  desiredValue = 0;
+  desiredTurnValue = 0;
+
+  vex::task::sleep(20);
+
+  resetDriveSensors = true;
+  desiredValue = 3500;
+  desiredTurnValue = -700;
+
+}
+
+void ADG()
+{
+  
 }
 
 void auton(void)
@@ -393,7 +407,63 @@ void auton(void)
   vex::task intaking(intake);
   vex::task indexing(index);
 
-  
+  enableIntake = true;
+  vex::task::sleep(100);
+
+  resetDriveSensors = true;
+  desiredValue = 900;
+  desiredTurnValue = 300;
+
+  vex::task::sleep(500);
+
+  resetDriveSensors = true;
+  desiredValue = 0;
+  desiredTurnValue = 0;
+
+  vex::task::sleep(20);
+
+  enableIntake = false;
+
+  indexP = 100;
+  enableIndex = true;
+  vex::task::sleep(1200);
+  indexP = 0;
+  enableIndex = false;
+
+  indexP = 100;
+  enableIntake = true;
+  enableIndex = true;
+  vex::task::sleep(800);
+  indexP = 0;
+  enableIntake = false;
+
+  resetDriveSensors = true;
+  desiredValue = -800;
+  desiredTurnValue = 1100;
+
+  vex::task::sleep(3000);
+
+  resetDriveSensors = true;
+  desiredValue = 0;
+  desiredTurnValue = 0;
+
+  vex::task::sleep(20);
+
+  resetDriveSensors = true;
+  desiredValue = 2100;
+  desiredTurnValue = -200;
+
+  vex::task::sleep(2000);
+
+  resetDriveSensors = true;
+  desiredValue = 0;
+  desiredTurnValue = 0;
+
+  indexP = 100;
+  enableIntake = true;
+  vex::task::sleep(750);
+  indexP = 0;
+  enableIndex = false;
 
 }
 
