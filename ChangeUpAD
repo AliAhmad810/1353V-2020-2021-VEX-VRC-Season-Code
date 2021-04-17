@@ -447,8 +447,14 @@ void auton(void)
   vex::task::sleep(20);
 
   resetDriveSensors = true;
-  desiredValue = 2400;
-  desiredTurnValue = -190;
+  desiredValue = 700;
+  desiredTurnValue = 0;
+
+  vex::task::sleep(500);
+
+  resetDriveSensors = true;
+  desiredValue = 2100;
+  desiredTurnValue = -300;
 
   vex::task::sleep(2000);
 
@@ -465,11 +471,11 @@ void auton(void)
   resetDriveSensors = true;
   desiredValue = -1000;
 
-  vex::task::sleep(20);
+  vex::task::sleep(100);
 
   resetDriveSensors = true;
   desiredValue = -1200;
-  desiredTurnValue = 330;
+  desiredTurnValue = 300;
 
   vex::task::sleep(2200);
 
@@ -483,7 +489,7 @@ void auton(void)
   enableIndex = true;
 
   resetDriveSensors = true;
-  desiredValue = 3300;
+  desiredValue = 3600;
   desiredTurnValue = -190;
 
   vex::task::sleep(3000);
