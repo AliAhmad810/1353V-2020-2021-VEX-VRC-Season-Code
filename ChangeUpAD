@@ -312,46 +312,15 @@ int index()
   }
 }
 
-void autoIndexTime(int power, int time)
+int t = 0;
+int timeTracker()
 {
-  lRoller.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
-  rRoller.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
-  vex::task::sleep(time);
-  lRoller.stop(brakeType::brake);
-  rRoller.stop(brakeType::brake);
-  vex::task::sleep(20);
-}
-
-void autoIntakeTime(int power, int time)
-{
-  lIntake.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
-  rIntake.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
-  vex::task::sleep(time);
-  lIntake.stop(brakeType::brake);
-  rIntake.stop(brakeType::brake);
-  vex::task::sleep(20);
-}
-
-void autoScoringTime(int power, int time)
-{
-  lIntake.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
-  rIntake.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
-  lRoller.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
-  rRoller.spin(vex::directionType::fwd, power, vex::velocityUnits::pct);
-  vex::task::sleep(time);
-  lIntake.stop(brakeType::brake);
-  rIntake.stop(brakeType::brake);
-  lRoller.stop(brakeType::brake);
-  rRoller.stop(brakeType::brake);
-  vex::task::sleep(20);
-}
-
-void autoDriveTime(int leftPower, int rightPower, int time)
-{
-  fLeft.spin(vex::directionType::fwd, leftPower, vex::velocityUnits::pct);
-  bLeft.spin(vex::directionType::fwd, leftPower, vex::velocityUnits::pct);
-  fRight.spin(vex::directionType::fwd, -1*rightPower, vex::velocityUnits::pct);
-  bRight.spin(vex::directionType::fwd, -1*rightPower, vex::velocityUnits::pct);
+  while(t < 150)
+  {
+    vex::task::sleep(100);
+    t += 100;
+  }
+  return 1;
 }
 
 void DA()
@@ -370,7 +339,7 @@ void DA()
   desiredValue = 0;
   desiredTurnValue = 0;
 
-  autoIndexTime(90,1500);
+  //  autoIndexTime(90,1500);
   
   resetDriveSensors = true;
   desiredValue = -2300;
@@ -395,11 +364,15 @@ void ADG()
   
 }
 
-void auton(void)
+vex::task driving(drivePID);
+vex::task intaking(intake);
+vex::task indexing(index);
+
+void autonomous(void)
 {
-  vex::task driving(drivePID);
-  vex::task intaking(intake);
-  vex::task indexing(index);
+
+  while(t < 150)
+  {
 
   enableIntake = true;
   vex::task::sleep(100);
@@ -500,14 +473,14 @@ void auton(void)
 
   vex::task::sleep(1);
 
-  indexP = 100;
+  intakeP = -100;
   enableIndex = true;
-  enableIntake = true;
 
   vex::task::sleep(1500);
 
-  vex::task::stop(indexing);
-  vex::task::stop(intaking); 
+  }
+
+
 
 }
 
@@ -520,6 +493,8 @@ void pre_auton()
 
 void usercontrol(void)
 {
+  vex::task::stop(indexing);
+  vex::task::stop(intaking); 
   enableDrivePID = false; 
   enableIntake = false;
   enableIndex = false;
@@ -536,7 +511,7 @@ void usercontrol(void)
 
 int main() 
 {
-  Competition.autonomous(auton);
+  Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
 
   pre_auton();
